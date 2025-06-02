@@ -9,14 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "deliverys")
+@Table(name = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryEntity {
 
   @Id
@@ -24,6 +24,27 @@ public class DeliveryEntity {
   private Long id;
 
   @Column(nullable = false)
+  private Long orderId;
+
+  @Column(nullable = false)
+  private Long storedId;
+
+  @Column(nullable = false)
+  private Long customerId;
+
+  @Column(nullable = true)
+  private Long riderId;
+
+  @Column(nullable = false)
   private DeliveryEntityStatus status;
 
+  @Builder
+  public DeliveryEntity(Long orderId, Long storedId, Long customerId, Long riderId,
+      DeliveryEntityStatus status) {
+    this.orderId = orderId;
+    this.storedId = storedId;
+    this.customerId = customerId;
+    this.riderId = riderId;
+    this.status = status;
+  }
 }
