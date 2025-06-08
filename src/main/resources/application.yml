@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: delivery
+  profiles:
+    active: local
+
+server:
+  port: 8090
+
