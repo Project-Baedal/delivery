@@ -7,11 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class DeliveryCreator {
+public class DeliveryReader {
 
   private final DeliveryJpaRepository repository;
 
-  public DeliveryEntity create(DeliveryEntity entity) {
-    return repository.save(entity);
+  public DeliveryEntity readDelivery(Long id) {
+    return repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("No delivery found with id: " + id));
   }
 }

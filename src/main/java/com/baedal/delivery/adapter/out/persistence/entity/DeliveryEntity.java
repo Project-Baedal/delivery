@@ -3,6 +3,8 @@ package com.baedal.delivery.adapter.out.persistence.entity;
 import com.baedal.delivery.adapter.out.persistence.enums.DeliveryEntityStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +37,7 @@ public class DeliveryEntity {
   @Column(nullable = true)
   private Long riderId;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private DeliveryEntityStatus status;
 
