@@ -17,4 +17,4 @@ redis:
       ttl: 1h
 
   channel-format:
-    delivery-update: "delivery:update:%d"
+    delivery-update: "delivery:update:store:%d"

@@ -3,6 +3,7 @@ package com.baedal.delivery.adapter.out.message;
 import com.baedal.delivery.adapter.out.message.publisher.RedisPublisher;
 import com.baedal.delivery.application.port.out.DeliveryMessagePublisherPort;
 import com.baedal.delivery.domain.model.DeliveryStatus;
+import com.baedal.delivery.domain.model.UpdateDeliveryStatus;
 import com.baedal.delivery.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +19,10 @@ public class DeliveryMessagePublisherAdapter implements DeliveryMessagePublisher
   @Value("${redis.channel-format.delivery-update}")
   private String channelFormat;
 
-  public void deliveryStatusUpdate(Long storeId, DeliveryStatus status) {
+  public void deliveryStatusUpdate(Long storeId, UpdateDeliveryStatus model) {
     String channelName = String.format(channelFormat, storeId);
     ChannelTopic topic = new ChannelTopic(channelName);
-    String message = ObjectMapperUtil.toJson(status);
+    String message = ObjectMapperUtil.toJson(model);
 
     redisPublisher.publish(topic, message);
   }
