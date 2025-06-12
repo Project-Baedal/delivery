@@ -1,6 +1,6 @@
-package com.baedal.delivery.adapter.in.web.manager;
+package com.baedal.delivery.adapter.out.web.manager;
 
-import com.baedal.delivery.adapter.in.message.listener.RedisSubscriber;
+import com.baedal.delivery.application.port.out.DeliveryStatusSubscriptionPort;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,9 +12,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SseEmitterManager {
+public class StoreSseEmitterManager {
 
-  private final RedisSubscriber subscriber;
+  private final DeliveryStatusSubscriptionPort subscriptionPort;
 
   private final Map<Long, SseEmitter> emitterMap = new ConcurrentHashMap<>();
 
@@ -22,7 +22,7 @@ public class SseEmitterManager {
     if (!emitterMap.containsKey(storeId)) {
       emitterMap.put(storeId, emitter);
 
-      subscriber.subscribe(storeId);
+      subscriptionPort.subscribe(storeId);
 
       emitter.onCompletion(() -> removeEmitter(storeId, "completion"));
       emitter.onTimeout(() -> removeEmitter(storeId, "timeout"));
@@ -33,7 +33,7 @@ public class SseEmitterManager {
     SseEmitter emitter = emitterMap.get(storeId);
     if (emitter != null) {
       emitterMap.remove(storeId);
-      subscriber.unsubscribe(storeId);
+      subscriptionPort.unsubscribe(storeId);
     }
     log.debug("Removing emitter {}", reason);
   }

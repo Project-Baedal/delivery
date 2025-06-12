@@ -1,5 +1,7 @@
-package com.baedal.delivery.adapter.in.message.listener;
+package com.baedal.delivery.adapter.in.message.subscription;
 
+import com.baedal.delivery.adapter.in.message.listener.DeliveryStatusListener;
+import com.baedal.delivery.application.port.out.DeliveryStatusSubscriptionPort;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisSubscriber {
+public class DeliveryStatusSubscriptionAdapter implements DeliveryStatusSubscriptionPort {
 
   private final RedisMessageListenerContainer listenerContainer;
 
@@ -23,7 +25,6 @@ public class RedisSubscriber {
 
   public synchronized void subscribe(Long storeId) {
     if (!subscribedTopics.containsKey(storeId)) {
-      // TODO: key 값에 따른 Subscriber 클래스 분리 예정
       String channelName = String.format(channelFormat, storeId);
       ChannelTopic topic = new ChannelTopic(channelName);
       listenerContainer.addMessageListener(listener, topic);
