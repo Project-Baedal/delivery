@@ -12,7 +12,12 @@ import com.baedal.delivery.application.port.out.DeliveryRepositoryPort;
 import com.baedal.delivery.domain.model.CreateDelivery;
 import com.baedal.delivery.domain.model.Delivery;
 import com.baedal.delivery.domain.model.UpdateDeliveryStatus;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +28,7 @@ public class DeliveryService implements DeliveryUseCase {
 
   private final DeliveryRepositoryPort deliveryRepository;
 
-  private final DeliveryCachePort deliveryCachePort;
+  private final DeliveryCachePort cachePort;
 
   private final DeliveryEventPublisherPort eventPublisher;
 
@@ -50,5 +55,46 @@ public class DeliveryService implements DeliveryUseCase {
     eventPublisher.publishEvent(event);
 
     return delivery.getId();
+  }
+
+  // FIXME: cache 조회 로직을 분리?
+  public List<UpdateDeliveryStatus> getStoresDeliveryStatus(Long storeId) {
+    Set<Long> deliveryIds = cachePort.findAllByStoreId(storeId);
+
+    if (deliveryIds.isEmpty()) { // 1. cache miss
+      return deliveryRepository.findAllValidDeliveriesByStoreId(storeId);
+    }
+
+    // 2. cache hit[store set]
+    Map<Long, UpdateDeliveryStatus> cached = new HashMap<>();
+    Set<Long> cacheMissed = new HashSet<>();
+
+    for (Long deliveryId : deliveryIds) {
+      cachePort.findByDeliveryId(deliveryId)
+          .map(status -> deliveryMapper.updateDeliveryStatus(deliveryId, status))
+          .ifPresentOrElse(
+              status -> cached.put(deliveryId, status),
+              () -> cacheMissed.add(deliveryId)
+          );
+    }
+
+    if (!cacheMissed.isEmpty()) { // 3. cache miss[delivery status]
+      List<Delivery> cacheMissedDeliveries =
+          deliveryRepository.findAllByIds(cacheMissed);
+
+      for (Delivery delivery : cacheMissedDeliveries) {
+        UpdateDeliveryStatus status = deliveryMapper.updateDeliveryStatus(delivery.getId(),
+            delivery.getStatus());
+        cached.put(delivery.getId(), status);
+
+        // 캐시 업데이트
+        cachePort.saveStatus(delivery.getId(), storeId, status.getStatus());
+      }
+    }
+
+    return deliveryIds.stream()
+        .map(cached::get)
+        .filter(Objects::nonNull)
+        .toList();
   }
 }

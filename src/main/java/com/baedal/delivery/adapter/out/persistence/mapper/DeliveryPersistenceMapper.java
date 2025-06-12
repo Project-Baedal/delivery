@@ -5,6 +5,7 @@ import com.baedal.delivery.adapter.out.persistence.enums.DeliveryEntityStatus;
 import com.baedal.delivery.domain.model.CreateDelivery;
 import com.baedal.delivery.domain.model.Delivery;
 import com.baedal.delivery.domain.model.DeliveryStatus;
+import com.baedal.delivery.domain.model.UpdateDeliveryStatus;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
@@ -15,4 +16,6 @@ public interface DeliveryPersistenceMapper {
   DeliveryEntity toEntity(CreateDelivery model);
 
   Delivery toDomain(DeliveryEntity entity);
+
+  UpdateDeliveryStatus toUpdateDeliveryStatus(DeliveryEntity entity);
 }

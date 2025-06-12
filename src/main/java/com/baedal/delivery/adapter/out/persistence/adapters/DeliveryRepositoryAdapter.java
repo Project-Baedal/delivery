@@ -10,6 +10,8 @@ import com.baedal.delivery.application.port.out.DeliveryRepositoryPort;
 import com.baedal.delivery.domain.model.CreateDelivery;
 import com.baedal.delivery.domain.model.Delivery;
 import com.baedal.delivery.domain.model.UpdateDeliveryStatus;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -42,5 +44,18 @@ public class DeliveryRepositoryAdapter implements DeliveryRepositoryPort {
   public Delivery findById(long id) {
     DeliveryEntity entity = reader.readDelivery(id);
     return mapper.toDomain(entity);
+  }
+
+  public List<Delivery> findAllByIds(Collection<Long> ids) {
+    return reader.readAllByIds(ids).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  public List<UpdateDeliveryStatus> findAllValidDeliveriesByStoreId(Long storeId) {
+    List<DeliveryEntity> entities = reader.readAllValidDeliveries(storeId);
+    return entities.stream()
+        .map(mapper::toUpdateDeliveryStatus)
+        .toList();
   }
 }
