@@ -1,0 +1,28 @@
+package com.baedal.delivery.adapter.out.message;
+
+import com.baedal.delivery.adapter.out.message.publisher.RedisPublisher;
+import com.baedal.delivery.application.port.out.DeliveryMessagePublisherPort;
+import com.baedal.delivery.domain.model.DeliveryStatus;
+import com.baedal.delivery.util.ObjectMapperUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class DeliveryMessagePublisherAdapter implements DeliveryMessagePublisherPort {
+
+  private final RedisPublisher redisPublisher;
+
+  @Value("${redis.channel-format.delivery-update}")
+  private String channelFormat;
+
+  public void deliveryStatusUpdate(Long storeId, DeliveryStatus status) {
+    String channelName = String.format(channelFormat, storeId);
+    ChannelTopic topic = new ChannelTopic(channelName);
+    String message = ObjectMapperUtil.toJson(status);
+
+    redisPublisher.publish(topic, message);
+  }
+}
